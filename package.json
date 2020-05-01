@@ -1,0 +1,20 @@
+{
+  "name": "fetchproject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "project.js",
+  "dependencies": {
+    "express": "^4.17.1",
+    "fetch": "^1.1.0",
+    "node-fetch": "^2.6.0",
+    "nodemon": "^2.0.3",
+    "prompt-sync": "^4.2.0",
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "start": "nodemon project.js"
+  },
+  "author": "",
+  "license": "ISC"
+}
