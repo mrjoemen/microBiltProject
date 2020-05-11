@@ -1,8 +1,7 @@
-const express = require('express')
-const app = express();
 const fetch = require("node-fetch")
 const token = "Qzk4V3HyaUf21uB5KqAIqD0K9uZk"
 const prompt = require('prompt-sync')({sigint: true});
+const xlsx = require('xlsx');
 const rl = require('readline').createInterface({
   input: process.stdin,
   output: process.stdout
@@ -13,25 +12,10 @@ const header = {
     "Authorization": "Bearer " + token,
     "Accept": "application/json"
 }
-const ExcelJS = require('exceljs');
 
-let workbook = new ExcelJS.Workbook()
+let workbook = xlsx.readFile("Book2.xlsx") //this gets access to the workbook
 
-async function addIntoToSheet() {
-  let wb = await workbook.xlsx.readFile('Book1.xlsx');
-  let ws = wb.getWorksheet(1);
-
-  const table = ws.getTable("test")
-  console.log(table)
-
-  // table.addRow(["Jose", "Dec 19, 1996", "6789959821", "3", "6 months"], 2)
-  // table.commit()
-
-  // console.log("Done!")
-}
-
-addIntoToSheet();
-
+let worksheet = workbook.Sheets["Sheet2"] //access to the worksheet, update these accordingly 
 
 getInformation = function(firstName, midName, lastName, addr, city, state, zip, num) {
     fetch("https://api.microbilt.com/EnhancedPeopleSearch/GetReport", {
@@ -69,24 +53,28 @@ getInformation = function(firstName, midName, lastName, addr, city, state, zip, 
             if (address[i].hasOwnProperty('PostAddr') && now.getFullYear() - new Date(address[i].PostAddr.AddrCreatedDt).getFullYear() <= 3 ) { // return address
                 count++;
                 let registeredAddress = `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}`
-                if (addr.toUpperCase().includes(registeredAddress) && i > 0) { //if the address is their current home (top of the list in microbilt API)
+                if (addr.toUpperCase().includes(registeredAddress) && i > 0) { //if the address is not their current home (Othewise if it's second on the list or so on)
                   let fromMonthsBeenThere = new Date(address[i].PostAddr.AddrCreatedDt)
                   let toMonthsBeenThere = new Date(address[i-1].PostAddr.AddrCreatedDt)
 
-                  console.log(`I've been at ${addr.toUpperCase()} from ${fromMonthsBeenThere.toString()} to ${toMonthsBeenThere.toString()}`)
+                  console.log(`At ${addr.toUpperCase()} from ${fromMonthsBeenThere.toString()} to ${toMonthsBeenThere.toString()}`)
+                  rowToInsert.TimeAtCurrentAddress = `At ${addr.toUpperCase()} from ${fromMonthsBeenThere.toString()} to ${toMonthsBeenThere.toString()}`
+
                 }
-                else if (addr.toUpperCase().includes(registeredAddress) && i === 0) {
+                else if (addr.toUpperCase().includes(registeredAddress) && i === 0) { //this checks how long they've been at their current address
                   let fromMonthsBeenThere = new Date(address[0].PostAddr.AddrCreatedDt)
 
-                  console.log(`I've been at ${addr.toUpperCase()} since ${fromMonthsBeenThere}`)
-                  //addIntoToSheet('f',)
+                  console.log(`At ${addr.toUpperCase()} since ${fromMonthsBeenThere}`)
+
+                  rowToInsert.TimeAtCurrentAddress = `At ${addr.toUpperCase()} since ${fromMonthsBeenThere}`
+
                 }
                 rowToInsert.NumOfAddressWithin3Years = count // return number of unique addresses
-                console.log("NumOfAddressWithin3Years")
+                console.log("NumOfAddressWithin3Years: " + count)
             }
 
             if (address[i].hasOwnProperty('PhoneNum')) { //return phone numbers
-              rowToInsert.PhoneNumbers = address[i].PhoneNum.Phone
+              rowToInsert.PhoneNumbers = address[i].PhoneNum.Phone + ", "
               console.log('Added PhoneNumber!')
            }
 
@@ -169,23 +157,32 @@ displayAddresses = function(firstName, lastName, addr, city, state, zip, num) {
   })
 }
 
-rowToInsert = {Name: "Jose", DOB: null, PhoneNumbers: null, NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
+function appendRow(row) {
+  
+  xlsx.utils.sheet_add_json(worksheet, row, {skipHeader: true, origin:-1})
+  
+  xlsx.writeFile(workbook, "Book2.xlsx")
+  console.log("Added to Excel sheet!")
+}
+
+rowToInsert = {Name: null, DOB: null, PhoneNumbers: null, NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
 
 
-// let fName = prompt("First name: ");
-// let mName = prompt("Middle name: ");
-// let lName = prompt("Last name: ")
-// let add = prompt("Address (convert drive to dr or lane to ln, etc.): ")
-// let city = prompt("City: ")
-// let state = prompt("Two letter state: ")
-// let zip = prompt("Zip code: ")
-// let number = prompt("number: ")
+let fName = prompt("First name: ");
+let mName = prompt("Middle name: ");
+let lName = prompt("Last name: ")
+let add = prompt("Address (convert drive to dr or lane to ln, etc.): ")
+let city = prompt("City: ")
+let state = prompt("Two letter state: ")
+let zip = prompt("Zip code: ") 
+let number = prompt("number: ")
 
-// console.log("\n")
+console.log("\n")
 
-// getInformation(fName, mName, lName, add, city, state, zip, number);
+getInformation(fName, mName, lName, add, city, state, zip, number);
+appendRow(rowToInsert)
 
-// addIntoToSheet(rowToInsert)
+
 
 rl.close();
 

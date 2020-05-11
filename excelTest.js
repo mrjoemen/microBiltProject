@@ -1,21 +1,13 @@
-// const ExcelJS = require('exceljs');
+let xlsx = require('xlsx');
 
-// let workbook = new ExcelJS.Workbook()
+let workbook = xlsx.readFile("Book2.xlsx")
 
-// async function addIntoToSheet(firstName) {
-//     let wb = await workbook.xlsx.readFile('worksheetForFetch.xlsx');
-//     let ws = wb.getWorksheet(1);
-  
+let worksheet = workbook.Sheets["Sheet2"]
 
-//     ws.getCell(`B${ws.rowCount + 1}`).value = firstName;
-//     await workbook.xlsx.writeFile('worksheetForFetch.xlsx');
-//     console.log('First name added!');
+//console.log(xlsx.utils.sheet_to_json(worksheet), [false])
 
-//     ws.
-// }
+xlsx.utils.sheet_add_json(worksheet, [{Name: "Jose Cabral", DOB: "12-19-1996", PhoneNumber: 
+"6789959821", NumOfAddressWithin3Years: "1", TimeAtCurrentAddress: "Since July 4, 2006" }], 
+{skipHeader: true, origin:-1})
 
-// addIntoToSheet("Mary")
-
-let today = new Date().getFullYear()
-
-console.log(today)
+xlsx.writeFile(workbook, "Book2.xlsx")
