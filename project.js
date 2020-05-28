@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const token = "Qzk4V3HyaUf21uB5KqAIqD0K9uZk"
+const token = "QDjbgkLZghkIYe3sNWFp5Eg08xvP"
 const prompt = require('prompt-sync')({sigint: true});
 const xlsx = require('xlsx');
 const rl = require('readline').createInterface({
@@ -15,7 +15,9 @@ const header = {
 
 let workbook = xlsx.readFile("Book2.xlsx") //this gets access to the workbook
 
-let worksheet = workbook.Sheets["Sheet2"] //access to the worksheet, update these accordingly 
+let worksheet = workbook.Sheets["Sheet4"] //access to the worksheet, update these accordingly 
+// let rowToInsert = new Object()
+let rowToInsert = {Name: null, DOB: null, PhoneNumbers: null, NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
 
 getInformation = function(firstName, midName, lastName, addr, city, state, zip, num) {
     fetch("https://api.microbilt.com/EnhancedPeopleSearch/GetReport", {
@@ -50,10 +52,11 @@ getInformation = function(firstName, midName, lastName, addr, city, state, zip, 
         let now = new Date();
 
         for (let i = 0; i < address.length; i++) {
-            if (address[i].hasOwnProperty('PostAddr') && now.getFullYear() - new Date(address[i].PostAddr.AddrCreatedDt).getFullYear() <= 3 ) { // return address
+            if (address[i].hasOwnProperty('PostAddr')) { // return address
                 count++;
                 let registeredAddress = `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}`
-                if (addr.toUpperCase().includes(registeredAddress) && i > 0) { //if the address is not their current home (Othewise if it's second on the list or so on)
+
+                if (now.getFullYear() - new Date(address[i].PostAddr.AddrCreatedDt).getFullYear() >= 3 && addr.toUpperCase().includes(registeredAddress) && i > 0) { //if the address is not their current home (Othewise if it's second on the list or so on)
                   let fromMonthsBeenThere = new Date(address[i].PostAddr.AddrCreatedDt)
                   let toMonthsBeenThere = new Date(address[i-1].PostAddr.AddrCreatedDt)
 
@@ -74,24 +77,26 @@ getInformation = function(firstName, midName, lastName, addr, city, state, zip, 
             }
 
             if (address[i].hasOwnProperty('PhoneNum')) { //return phone numbers
-              rowToInsert.PhoneNumbers = address[i].PhoneNum.Phone + ", "
-              console.log('Added PhoneNumber!')
+              rowToInsert.PhoneNumbers  = address[i].PhoneNum.Phone + ", "
+              console.log('PhoneNumbers: ' + address[i].PhoneNum.Phone + ", ")
            }
 
         }
+
         rowToInsert.DOB = birthDay //return birthday
-        console.log("Added DOB")
+        rowToInsert.Name = firstName + " " + lastName  //return name
+        console.log("DOB: " + birthDay)
     })
     .catch(err => {
       console.log("Information not found or typed incorrectly... try again")
       rl.close()
     })
 
-      if (rls.keyInYN("display addresses?")) {
-        displayAddresses(firstName, lastName, addr, city, state, zip, num)
-      }
-      rowToInsert.Name = firstName + " " + lastName  //return name
-      console.log('Added Name!')
+      // if (rls.keyInYN("display addresses?")) {
+      //   displayAddresses(firstName, lastName, addr, city, state, zip, num)
+      // }
+      rl.close()
+
 }
 
 displayAddresses = function(firstName, lastName, addr, city, state, zip, num) {
@@ -157,15 +162,22 @@ displayAddresses = function(firstName, lastName, addr, city, state, zip, num) {
   })
 }
 
-function appendRow(row) {
-  
-  xlsx.utils.sheet_add_json(worksheet, row, {skipHeader: true, origin:-1})
-  
-  xlsx.writeFile(workbook, "Book2.xlsx")
-  console.log("Added to Excel sheet!")
-}
+function appendRow(rowT) {
+  if (rowT.DOB === null) {
+    rl.question("Would you like to append to Book2.xlsx? ", answer => {
+      if (answer.startsWith('y')) {
+          xlsx.utils.sheet_add_json(worksheet, [rowToInsert], {skipHeader: true, origin:-1})
+        
+          xlsx.writeFile(workbook, "Book2.xlsx")
+          console.log("Added to Excel sheet!")
 
-rowToInsert = {Name: null, DOB: null, PhoneNumbers: null, NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
+      }
+      else {
+        console.log("There was an error")
+      }
+    })
+  }
+}
 
 
 let fName = prompt("First name: ");
@@ -179,12 +191,15 @@ let number = prompt("number: ")
 
 console.log("\n")
 
-getInformation(fName, mName, lName, add, city, state, zip, number);
-appendRow(rowToInsert)
+
+async function run(getInfo) {
+  await getInfo(fName, mName, lName, add, city, state, zip, number)
+  appendRow(rowToInsert)
 
 
+  rl.close();
+}
+
+run(getInformation)
 
 rl.close();
-
-
-
