@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-const token = "wLNGLMgdEwEepOUPD3fZoRZaDAtV"
+let token = "jvryYGaDABfLpQN7pp8xhyEAL9Er"
 const prompt = require('prompt-sync')({sigint: true});
 const xlsx = require('xlsx');
 const rl = require('readline').createInterface({
@@ -16,7 +16,7 @@ let workbook = xlsx.readFile("Book2.xlsx") //this gets access to the workbook
 
 let worksheet = workbook.Sheets["Sheet4"] //access to the worksheet, update these accordingly 
 
-let rowToInsert = {Name: null, DOB: null, PhoneNumbers: null, NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
+let rowToInsert = {Name: null, DOB: null, PhoneNumbers: "", NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
 
 const getJson = async (firstName, midName, lastName, address, city, state, zip) => {
     const response = await fetch("https://api.microbilt.com/EnhancedPeopleSearch/GetReport", {
@@ -57,123 +57,89 @@ const insertDataToObj = async (res, addr) => {
 
   for (let i = 0; i < address.length; i++) {
       if (address[i].hasOwnProperty('PostAddr')) { // return address
+        if (address[i].PostAddr.AddrType !== "P") {
 
-          let registeredAddress = `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}`
+          let registeredAddress = address[i].PostAddr.hasOwnProperty("PreDirection") ? 
+          `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.PreDirection} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}` :
+          `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}`
 
           if (addr.toUpperCase().includes(registeredAddress) && i === 0) { //this checks how long they've been at their current address
             count++;
             let fromMonthsBeenThere = new Date(address[0].PostAddr.AddrCreatedDt)
 
-            console.log(`At ${addr.toUpperCase()} since ${fromMonthsBeenThere.toDateString()}`)
+            //console.log(`At ${addr.toUpperCase()} since ${fromMonthsBeenThere.toDateString()}`)
 
             rowToInsert.TimeAtCurrentAddress = `At ${addr.toUpperCase()} since ${fromMonthsBeenThere.toDateString()}`
 
           }
 
-          else if (now.getFullYear() - new Date(address[i].PostAddr.AddrCreatedDt).getFullYear() <= 3 && addr.toUpperCase().includes(registeredAddress) && i > 0) { //if the address is not their current home (Othewise if it's second on the list or so on)
+          else if (addr.toUpperCase().includes(registeredAddress) && i > 0) { //if the address is not their current home (Othewise if it's second on the list or so on)
           count++;
           let fromMonthsBeenThere = new Date(address[i].PostAddr.AddrCreatedDt)
           let toMonthsBeenThere = new Date(address[i-1].PostAddr.AddrCreatedDt)
   
-          console.log(`At ${addr.toUpperCase()} from ${fromMonthsBeenThere.toDateString()} to ${toMonthsBeenThere.toDateString()}`)
+          //console.log(`At ${addr.toUpperCase()} from ${fromMonthsBeenThere.toDateString()} to ${toMonthsBeenThere.toDateString()}`)
           rowToInsert.TimeAtCurrentAddress = `At ${addr.toUpperCase()} from ${fromMonthsBeenThere.toDateString()} to ${toMonthsBeenThere.toDateString()}`
+
+          now.getFullYear() - new Date(address[i].PostAddr.AddrCreatedDt).getFullYear() <= 3 ? count++ : count += 0
   
-      }
+          }
+          else if (now.getFullYear() - new Date(address[i].PostAddr.AddrCreatedDt).getFullYear() <= 3) {
+            count++
+          }
           rowToInsert.NumOfAddressWithin3Years = count // return number of unique addresses
-          console.log("NumOfAddressWithin3Years: " + count)
+          //console.log("NumOfAddressWithin3Years: " + count)
+        }
       }
 
       if (address[i].hasOwnProperty('PhoneNum')) { //return phone numbers
         rowToInsert.PhoneNumbers += address[i].PhoneNum.Phone + " "
-        console.log(address[i].PhoneNum.Phone + " ")
+        //console.log(address[i].PhoneNum.Phone + " ")
      }
 
   }
 
-  rowToInsert.DOB = birthDay //return birthday
-  console.log("DOB: " + birthDay)
+  rowToInsert.DOB = birthDay.toDateString() //return birthday
+  //console.log("DOB: " + birthDay)
 
-}
-
-
-displayAddresses = function(firstName, lastName, addr, city, state, zip, num) {
-  fetch("https://api.microbilt.com/EnhancedPeopleSearch/GetReport", {
-      method: "POST",
-      headers: header,
-      body: JSON.stringify({
-          "PersonInfo": {
-              "PersonName": {
-                "FirstName": firstName,
-                "LastName": lastName
-              },
-              "ContactInfo": [
-                {
-                  "PostAddr": {
-                      "Addr1": addr,
-                    "City": city,
-                    "StateProv": state,
-                    "PostalCode": zip
-                  }
-                }
-              ]
-            }
-      })
-      
-  })
-  .then(res => res.json())
-  .then(res => {
-      let Info = res.Subject[0].PersonInfo.ContactInfo
-
-      for (let i = 0; i < Info.length; i++) {
-          if (Info[i].hasOwnProperty('PostAddr')) {
-            if (Info[i].PostAddr.hasOwnProperty("PreDirection") && Info[i].PostAddr.hasOwnProperty("PostDirection") && Info[i].PostAddr.hasOwnProperty("Apt")){
-              console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.PreDirection} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} ${Info[i].PostAddr.PostDirection} APT ${Info[i].PostAddr.Apt} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("PreDirection") && Info[i].PostAddr.hasOwnProperty("PostDirection")) {
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.PreDirection} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} ${Info[i].PostAddr.PostDirection} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("Apt") && Info[i].PostAddr.hasOwnProperty("PostDirection")) {
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} ${Info[i].PostAddr.PostDirection} APT ${Info[i].PostAddr.Apt} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("Apt") && Info[i].PostAddr.hasOwnProperty("PreDirection")) {
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.PreDirection} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} APT ${Info[i].PostAddr.Apt} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("Apt")) {
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} APT ${Info[i].PostAddr.Apt} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("PreDirection")) {
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.PreDirection} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("PostDirection")) {
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} ${Info[i].PostAddr.PostDirection} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-          else if (Info[i].PostAddr.hasOwnProperty("StreetName")){
-            console.log(`${Info[i].PostAddr.StreetNum} ${Info[i].PostAddr.StreetName} ${Info[i].PostAddr.StreetType} - ${Info[i].PostAddr.City}, ${Info[i].PostAddr.StateProv}, ${Info[i].PostAddr.PostalCode}`)
-          }
-        }
-      }
-    }
-  )
-  .catch(err => {
-    console.log("Could not locate addresses")
-  })
 }
 
 function appendRow(rowT) {
   if (rowT.DOB !== null) {
     rl.question("Would you like to append to Book2.xlsx? ", answer => {
       if (answer.startsWith('y')) {
+        try {
           xlsx.utils.sheet_add_json(worksheet, [rowToInsert], {skipHeader: true, origin:-1})
         
           xlsx.writeFile(workbook, "Book2.xlsx")
-          console.log("Added to Excel sheet!")
-
+          console.log("\nAdded to Excel sheet!")
+          rl.close()
+        }
+        catch {
+          console.log("Error! Make sure that Excel is saved and closed!")
+          rl.close()
+        }
       }
       else {
-        console.log("There was an error")
+        rl.close()
       }
     })
   }
+}
+
+const getToken = async () => {
+  const RequestToken = await fetch("https://apidev.microbilt.com/OAuth/GetAccessToken", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({
+      "client_id": "r5I40AtGAnx9ruBiKr1s1hoPgvn5SGxZ",
+      "client_secret": "VH93vZBFg08GYwcg",
+      "grant_type": "client_credentials"
+    })
+  })
+
+  const responseObject = await RequestToken.json() 
+  return(responseObject.access_token)
 }
 
 const main = async () => {
@@ -188,23 +154,28 @@ const main = async () => {
   console.log("\n")
 
   rowToInsert.Name = fName + " " + lName  //return name
-  try {
-    const hello = await getJson(fName, mName, lName, addr, city, state, zip)
-    setTimeout(() => {
+  const hello = await getJson(fName, mName, lName, addr, city, state, zip)
+  if (hello.hasOwnProperty("fault")) {
+    if (hello.fault.faultstring === "Access Token expired") {
+      token = await getToken()
+      setTimeout(() => {
+        console.log(`Access token expired, new access token: ${token}. Run the program again`)
+        rl.close()
+      }, 5000)
+
+    }
+  }
+  setTimeout(() => {
+    if (hello.MsgRsHdr.Status.StatusDesc === "NOHIT") {
+      throw ("Could not find customer")
+    }
+    else {
       insertDataToObj(hello, addr)
       console.log(rowToInsert)
-      rl.close()
-      //appendRow(rowToInsert)
-    })
-  }
-  catch {
-    if (res.Status.StatusDesc === "NOHIT") {
-      throw "Could not find customer"
+      appendRow(rowToInsert)
     }
-    else if (res.faultstring === "Access Token expired") {
-      throw "Token expired"
-    }
-  }
+    
+  })
 
 }
 
