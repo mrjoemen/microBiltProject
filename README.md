@@ -6,6 +6,7 @@ Hello there! This is the SearchTool that I've made using Microbilt's Enchanced P
 This simple, but robust, app will ask the user for simple information about the person that you are trying to search.
 
 it will ask for:
+
     * Name
     * Middle Name (optional, just press enter if not used)
     * Last Name
@@ -15,6 +16,7 @@ it will ask for:
     * And finally zip code
 
 After requesting the information, it will strip all of the infomation from the response from Mircobilt and give the following infomation:
+
     * Name
     * Date of Birth
     * List of phone numbers that is under that individual
@@ -39,8 +41,8 @@ Once the request is done, the app will ask if you would like to input the object
 
     a. When inputting the address ensure that you convert them from [street type into its shorthand abbreviation](https://cceo.org/addressing/documents/StreetAbbreviationsGuide.pdf), do not include the post direction that is in the address, or their apartment number if it exists. For example:
 
-        -'1234 Applewood Road NW' would be inputted as `1234 applewood rd`
-        -'5678 Orangetree Street, STE 100' would be inputted as `5678 orangetree str`
+        - '1234 Applewood Road NW' would be inputted as `1234 applewood rd`
+        - '5678 Orangetree Street, STE 100' would be inputted as `5678 orangetree str`
 
     Lastly, if the address includes a pre direction then that must be included into the address because it is part of the address. For example:
 
@@ -48,9 +50,9 @@ Once the request is done, the app will ask if you would like to input the object
     
     b. When inputting the state, make sure to use the [state's code](https://www.factmonster.com/us/postal-information/state-abbreviations-and-state-postal-codes). For example:
 
-        -Georgia => GA
-        -New York => NY
-        -Florida => FL
+        - Georgia => GA
+        - New York => NY
+        - Florida => FL
 
     c. Lastly, make sure to use just the five digit zip code when inputting it.
 
