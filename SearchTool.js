@@ -13,13 +13,13 @@ const header = {
     "Accept": "application/json"
 }
 const fs = require('fs')
-let workbook = xlsx.readFile("Book2.xlsx") //this gets access to the workbook
+let workbook = xlsx.readFile("Book1.xlsx") //this gets access to the workbook
 
-let worksheet = workbook.Sheets["Sheet4"] //access to the worksheet, update these accordingly 
+let worksheet = workbook.Sheets["Sheet1"] //access to the worksheet, update these accordingly 
 
 let rowToInsert = {Name: null, DOB: null, PhoneNumbers: "", NumOfAddressWithin3Years: null, TimeAtCurrentAddress: null}
 
-const getJson = async (firstName, midName, lastName, address, city, state, zip) => {
+const getJson = async (firstName, midName, lastName, address, city, state, zip) => { // retrieves json
     const response = await fetch("https://api.microbilt.com/EnhancedPeopleSearch/GetReport", {
       method: "POST",
       headers: {
@@ -62,9 +62,9 @@ const insertDataToObj = async (res, addr) => {
 
   for (let i = 0; i < address.length; i++) {
       if (address[i].hasOwnProperty('PostAddr')) { // return address
-        if (address[i].PostAddr.AddrType !== "P") {
+        if (address[i].PostAddr.AddrType !== "P") { //ignores all PO boxes
 
-          let registeredAddress = address[i].PostAddr.hasOwnProperty("PreDirection") ? 
+          let registeredAddress = address[i].PostAddr.hasOwnProperty("PreDirection") ? //Does the response have a Pre Direction? if true then include it, otherwise ignore it
           `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.PreDirection} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}` :
           `${address[i].PostAddr.StreetNum} ${address[i].PostAddr.StreetName} ${address[i].PostAddr.StreetType}`
 
@@ -109,14 +109,14 @@ const insertDataToObj = async (res, addr) => {
 
 }
 
-function appendRow(rowT) {
+function appendRow(rowT) { // This function will append the object onto the sheet
   if (rowT.DOB !== null) {
-    rl.question("Would you like to append to Book2.xlsx? ", answer => {
+    rl.question("Would you like to append to Book1.xlsx? ", answer => {
       if (answer.startsWith('y')) {
         try {
           xlsx.utils.sheet_add_json(worksheet, [rowToInsert], {skipHeader: true, origin:-1})
         
-          xlsx.writeFile(workbook, "Book2.xlsx")
+          xlsx.writeFile(workbook, "Book1.xlsx")
           console.log("\nAdded to Excel sheet!")
           rl.close()
         }
@@ -132,7 +132,7 @@ function appendRow(rowT) {
   }
 }
 
-const getToken = async () => {
+const getToken = async () => { //This function retreives a token
   const RequestToken = await fetch("https://apidev.microbilt.com/OAuth/GetAccessToken", {
     method: "POST",
     headers: {"Content-Type": "application/json"},
@@ -160,7 +160,7 @@ const main = async () => {
   console.log("\n")
 
   rowToInsert.Name = fName.toUpperCase() + " " + lName.toUpperCase()  //return name
-  const hello = await getJson(fName, mName, lName, addr, city, state, zip)
+  const response = await getJson(fName, mName, lName, addr, city, state, zip) // this is the entire object that will be returned
   // if (hello.hasOwnProperty("fault")) {
   //   if (hello.fault.faultstring === "Access Token expired" || hello.fault.faultstring === "Invalid Access Token") {
   //     token = await getToken()
@@ -172,11 +172,11 @@ const main = async () => {
 
   // }
   setTimeout(() => {
-    if (hello.hasOwnProperty('MsgRsHdr') && hello.MsgRsHdr.Status.StatusDesc === "NOHIT") {
+    if (response.hasOwnProperty('MsgRsHdr') && response.MsgRsHdr.Status.StatusDesc === "NOHIT") { //checks to see if the information was found or not
       throw ("could not find customer")
     }
     else {
-      insertDataToObj(hello, addr)
+      insertDataToObj(response, addr)
       console.log(rowToInsert) 
       appendRow(rowToInsert)
     }

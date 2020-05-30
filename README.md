@@ -33,7 +33,7 @@ Once the request is done, the app will ask if you would like to input the object
 
     b. Downloading it directly from the link above and placing it at the desired location.
 
-2. Open the command prompt (or terminal for Mac) and change directories into the folder SearchTool.js is located using cd. Here is a link for [Windows](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cd) and [Mac](https://github.com/0nn0/terminal-mac-cheatsheet#english-version).  
+2. Open the command prompt (or terminal for Mac) and change directories into the folder `SearchTool.js` is located using `cd`. Here is a link for [Windows](https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/cd) and [Mac](https://github.com/0nn0/terminal-mac-cheatsheet#english-version).  
 
 3. Once you are in the folder itself, input `node SearchTool.js` into the terminal.
 
@@ -41,18 +41,18 @@ Once the request is done, the app will ask if you would like to input the object
 
     a. When inputting the address ensure that you convert them from [street type into its shorthand abbreviation](https://cceo.org/addressing/documents/StreetAbbreviationsGuide.pdf), do not include the post direction that is in the address, or their apartment number if it exists. For example:
 
-        - '1234 Applewood Road NW' would be inputted as `1234 applewood rd`
-        - '5678 Orangetree Street, STE 100' would be inputted as `5678 orangetree str`
+    - 1234 Applewood Road NW would be inputted as `1234 applewood rd`
+    - 5678 Orangetree Street, STE 100 would be inputted as `5678 orangetree str`
 
     Lastly, if the address includes a pre direction then that must be included into the address because it is part of the address. For example:
 
-        -'555 North Waterfall Drive' would be inputted as `555 N waterfall dr`
+    -555 North Waterfall Drive would be inputted as `555 N waterfall dr`
     
     b. When inputting the state, make sure to use the [state's code](https://www.factmonster.com/us/postal-information/state-abbreviations-and-state-postal-codes). For example:
 
-        - Georgia => GA
-        - New York => NY
-        - Florida => FL
+    - Georgia => GA
+    - New York => NY
+    - Florida => FL
 
     c. Lastly, make sure to use just the five digit zip code when inputting it.
 
@@ -60,7 +60,7 @@ Once the request is done, the app will ask if you would like to input the object
 
 6. Once the object has been made, it will appear and prompt the user if they would like to input the object into an excel spreadsheet that is located in the same folder as `SearchTool.js`.
 
-    a. If the user inputs "yes" and all of the information looks correct to the user, it will input the information into the xlsx file, by default it is set to input information into Book2.xlsx. If you would like to change the pathway of the variable 'workbook.' If this is done, make sure to also confirm that the variable 'worksheet' is also changed to the correct worksheet.
+    a. If the user inputs "yes" and all of the information looks correct to the user, it will input the information into the xlsx file, by default it is set to input information into Book1.xlsx. If you would like to change the pathway of the variable 'workbook.' If this is done, make sure to also confirm that the variable 'worksheet' is also changed to the correct worksheet.
 
 7. Then when completed, it will say "added to excel sheet" and the program will close.
 
