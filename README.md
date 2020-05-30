@@ -5,23 +5,23 @@ Hello there! This is the SearchTool that I've made using Microbilt's Enchanced P
 ### What it does
 This simple, but robust, app will ask the user for simple information about the person that you are trying to search.
 
-it will ask for:
+It will ask for:
 
-    * Name
-    * Middle Name (optional, just press enter if not used)
-    * Last Name
-    * Address
-    * City
-    * State
-    * And finally zip code
+* Name
+* Middle Name (optional, just press enter if not used)
+* Last Name
+* Address
+* City
+* State
+* And finally zip code
 
 After requesting the information, it will strip all of the infomation from the response from Mircobilt and give the following infomation:
 
-    * Name
-    * Date of Birth
-    * List of phone numbers that is under that individual
-    * The number of address within three years
-    * And the time that they have been living at the inputted address
+* Name
+* Date of Birth
+* List of phone numbers that is under that individual
+* The number of address within three years
+* And the time that they have been living at the inputted address
 
 Once the request is done, the app will ask if you would like to input the object into an excel spreadsheet, if 'yes' is selected, then it'll be inputted into the *xlsx document* that is in the same location as the app.
 
