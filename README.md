@@ -1,4 +1,4 @@
-# SearchTooljs
+# SearchTool.js
 
 Hello there! This is the SearchTool that I've made using Microbilt's Enchanced People Search!
 
