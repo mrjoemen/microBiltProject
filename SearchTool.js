@@ -1,5 +1,5 @@
 const fetch = require("node-fetch")
-let token = "8R4DRFDirE1S82riAKVWw67zolsp"
+let token = "" // token
 const prompt = require('prompt-sync')({sigint: true});
 const xlsx = require('xlsx');
 const rl = require('readline').createInterface({
@@ -137,8 +137,8 @@ const getToken = async () => { //This function retreives a token
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify({
-      "client_id": "r5I40AtGAnx9ruBiKr1s1hoPgvn5SGxZ",
-      "client_secret": "VH93vZBFg08GYwcg",
+      "client_id": "", //clientID
+      "client_secret": "", //client secret
       "grant_type": "client_credentials"
     })
   })
