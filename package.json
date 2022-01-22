@@ -7,7 +7,7 @@
     "exceljs": "^3.9.0",
     "express": "^4.17.1",
     "fetch": "^1.1.0",
-    "node-fetch": "^2.6.0",
+    "node-fetch": "^3.1.1",
     "nodemon": "^2.0.3",
     "prompt-sync": "^4.2.0",
     "readline-sync": "^1.4.10",
